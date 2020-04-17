@@ -1,6 +1,6 @@
-package com.company.project.core;
+package com.bzm.core;
 
-import com.alibaba.fastjson.JSON;
+import cn.hutool.json.JSONUtil;
 
 /**
  * 统一API响应结果封装
@@ -39,6 +39,6 @@ public class Result<T> {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        return JSONUtil.toJsonStr(this);
     }
 }
