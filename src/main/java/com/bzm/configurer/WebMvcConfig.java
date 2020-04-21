@@ -1,5 +1,6 @@
 package com.bzm.configurer;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.json.JSON;
 import cn.hutool.json.JSONUtil;
 import com.bzm.core.Result;
@@ -8,11 +9,14 @@ import com.bzm.core.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.servlet.ServletException;
@@ -25,9 +29,34 @@ import java.util.List;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    /**
+     * @Author wuxw
+     * @Description implements WebMvcConfigurer 该接口,重写addResourceHandlers ,添加swagger2 UI doc样式
+     * @Date 9:49 2019/3/15
+     * @Param [registry]
+     * @return void
+     **/
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
+
+        registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
+
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        // 设置访问路径
+        registry.addViewController( "/" ).setViewName( "forward:/static/index.html" );
+        registry.setOrder( Ordered.HIGHEST_PRECEDENCE );
+        //WebMvcConfigurer.super.addViewControllers(registry);
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(getAuthenticationInterceptor())
+                .excludePathPatterns("/static/**") //告知拦截器：/static/**不需要拦截 （配置的是 路径）
                 .addPathPatterns("/**");    // 拦截所有请求，通过判断是否有 @LoginRequired 注解 决定是否需要登录
     }
 
@@ -45,11 +74,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 Result result = new Result();
                 if (e instanceof ServiceException) {//业务失败的异常，如“账号或密码错误”
                     result.setCode(ResultCode.FAIL).setMessage(e.getMessage());
-                    log.info(e.getMessage());
+                    log.error(  ExceptionUtil.getRootCauseMessage(e));
                 } else if (e instanceof NoHandlerFoundException) {
                     result.setCode(ResultCode.NOT_FOUND).setMessage("接口 [" + request.getRequestURI() + "] 不存在");
+                    log.error(  ExceptionUtil.getRootCauseMessage(e));
                 } else if (e instanceof ServletException) {
                     result.setCode(ResultCode.FAIL).setMessage(e.getMessage());
+                    log.error(  ExceptionUtil.getRootCauseMessage(e));
                 } else {
                     result.setCode(ResultCode.INTERNAL_SERVER_ERROR).setMessage("接口 [" + request.getRequestURI() + "] 内部错误，请联系管理员");
                     String message;

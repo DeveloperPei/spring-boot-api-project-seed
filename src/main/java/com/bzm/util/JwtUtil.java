@@ -45,7 +45,7 @@ public class JwtUtil {
         return JWT.create()
                 .withHeader(header)
                 .withIssuer(ISSUER)
-                .withClaim("loginName",user.getUsername())
+                .withClaim("userName",user.getUserName())
                 .withClaim("userId",user.getUserId())
                 .withExpiresAt(date)
                 .sign(algorithm);
@@ -69,7 +69,7 @@ public class JwtUtil {
                 return null;
             }
             Map<String, Claim> userMap = jwt.getClaims();
-            String loginName = userMap.get("loginName").asString();
+            String loginName = userMap.get("userName").asString();
             Integer userId = userMap.get("userId").asInt();
             return new User(userId,loginName,null);
         } catch (IllegalArgumentException e) {

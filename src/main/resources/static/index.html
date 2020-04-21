@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<!-- 新 Bootstrap 核心 CSS 文件 https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css-->
+<link href="../static/css/bootstrap.min.css" rel="stylesheet">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js-->
+<script src="../static/js/jquery.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js -->
+<script src="../static/js/bootstrap.min.js"></script>
+<script src="../static/js/vue.js"></script>
+<script src="../static/js/axios.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>暴走的耗子</title>
+</head>
+<style type="text/css">
+    .desc{
+        font-size: small
+    }
+</style>
+<script>
+</script>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<script>
+</script>
+<body>
+<div  id="content" class="container-fluid">
+    <div  class="row clearfix">
+        <div class="col-md-5 column" align="center"></div>
+        <div class="col-md-2 column" id="myScrollspy" align="center">
+            <div class="page-header" >
+                <h3>
+                    暴走的耗子 <small> · baozouMouse</small>
+                </h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 column" style="margin-top: 50px;margin-bottom: 30px">
+        <h4 v-if="total>0" align="center">找到商品数量：<span style="color: #4cae4c">&nbsp;{{total}}</span></h4>
+        <form role="form" >
+            <div class="col-md-3 column" align="center"></div>
+                <div class="form-group col-md-6 column input-group" >
+                    <input name="searchContent" placeholder="输入商品名称"  class="form-control" id="searchContent" v-model="searchParam.content" />
+                    <span  class="btn-success input-group-addon" @click="searchProduct()">搜索</span>
+                </div>
+        </form>
+    </div>
+    <div>
+        <div class="row clearfix productList" align="center">
+            <div class="col-md-2 column" v-for="(item,index) in productList" align="left">
+                <a :href="item.url" target="_blank" style="text-decoration: none">
+                    <img :src="item.pict_url" width="90%" height="95%">
+                    <div class="desc"> {{item.short_title}}</div>
+                    <div style="width: 100%" class="desc">
+                        <span style="text-align: left">{{item.shop_title}}</span>
+                        <span v-if="item.user_type==1" style="text-align: right">天猫</span><span v-if="item.user_type==0" style="text-align: right">淘宝</span>
+                        <span v-if="item.real_post_fee==0">包邮</span>
+                    </div>
+                    <p class="desc">
+                        原价: {{item.reserve_price}}<span style="color: red">&nbsp;&nbsp;&nbsp;现价：{{item.zk_final_price}}</span><br/>
+                        优惠券：{{item.coupon_info}}<br/>
+                        剩余：{{item.coupon_remain_count}}<br/>
+                        生效时间：{{item.coupon_start_time}}/{{item.coupon_end_time}}<br/>
+                    </p>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+<script type="text/javascript">
+    var url = "http://localhost:8080";
+    var vm = new Vue({
+        el: '#content',
+        data() {
+            return {
+                productList: null,
+                siteList: null,
+                searchContent:null,
+                total:0,
+                totalPage:0,
+                prodListLoadingOver:false,
+                lastPage: false,
+                searchParam:{
+                    pageSize:12,
+                    pageNum:1,
+                    content:null
+                }
+            }
+        },
+        methods: {
+            searchProduct(){
+                if(!this.searchParam.content.trim()){
+                    alert("搜索内容不能为空");
+                    return;
+                }
+                axios({
+                    url: url+'/product/searchProduct',
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    data: JSON.stringify(this.searchParam)
+                }).then((res) => {
+                    if (res.data.code == '200') {
+                        this.total= JSON.parse(res.data.data).tbk_dg_material_optional_response.total_results;
+                        let resData  = JSON.parse(res.data.data).tbk_dg_material_optional_response.result_list.map_data;
+                        if(this.searchParam.pageNum ==1){
+                            this.productList =resData;
+                            this.totalPage= (this.total/this.searchParam.pageSize)+1;
+                        }else {
+                            this.productList= this.productList.concat(resData);
+                            if(this.totalPage=this.pageNum){
+                                this.lastPage = true;
+                            }
+                        }
+                        this.prodListLoadingOver = true;
+                    } else {
+                        alert(res.data.message);
+                    }
+                })
+            },
+            handleScroll(){
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+                let h = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight; //屏幕的高度
+                let prodListHeight = document.querySelector('.productList').offsetHeight-h-20;  //.myOrderListWrapper 商品列表容器
+                console.log(scrollTop,":::",prodListHeight)
+                if(scrollTop > prodListHeight && this.prodListLoadingOver && !this.lastPage){
+                    this.searchParam.pageNum =  this.searchParam.pageNum  + 1;
+                    this.searchProduct();
+                }
+            }
+
+        },
+        created() {
+
+        },
+        watch: {
+
+        },
+        mounted() {
+            window.addEventListener('scroll', this.handleScroll);
+        },
+        destroyed(){
+            window.removeEventListener('scroll', this.handleScroll);
+        }
+
+    })
+</script>
+</html>

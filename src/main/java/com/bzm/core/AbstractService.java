@@ -14,7 +14,7 @@ import java.util.List;
  */
 public abstract class AbstractService<T> implements Service<T> {
 
-    @Autowired
+    @Autowired(required = false)
     protected Mapper<T> mapper;
 
     private Class<T> modelClass;    // 当前泛型真实类型的Class
@@ -48,7 +48,10 @@ public abstract class AbstractService<T> implements Service<T> {
     public T findById(Integer id) {
         return mapper.selectByPrimaryKey(id);
     }
-
+    @Override
+    public T selectOne(T model){
+       return mapper.selectOne(model);
+    }
     @Override
     public T findBy(String fieldName, Object value) throws TooManyResultsException {
         try {

@@ -40,6 +40,7 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
                 if(user == null){
                     throw new RuntimeException("Token异常，请重新登录");
                 }
+                httpServletRequest.setAttribute("user",user);
                 return true;
             }
         }
