@@ -78,9 +78,10 @@
         </dependency>
         <dependency>
             <groupId>com.taobao.platform</groupId>
-            <artifactId>taobao-sdk-java</artifactId>
+            <artifactId>taobao-sdk-java-auto_1585288601336-20200329</artifactId>
             <scope>system</scope>
-            <systemPath>${pom.basedir}\src\main\lib\taobao-sdk-java-auto_1585288601336-20200329.jar</systemPath>
+            <systemPath>${project.basedir}\src\main\lib\taobao-sdk-java-auto_1585288601336-20200329.jar</systemPath>
+            <version>1.8.7</version>
         </dependency>
         <!--热部署-->
         <dependency>
@@ -92,6 +93,19 @@
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/lib</directory>
+                <targetPath>BOOT-INF/lib/</targetPath>
+                <includes>
+                    <include>**/*.jar</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <targetPath>BOOT-INF/classes/</targetPath>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -100,10 +114,6 @@
                     <!--fork :  如果没有该项配置，肯定devtools不会起作用，即应用不会restart -->
                     <fork>true</fork>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
