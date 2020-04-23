@@ -49,7 +49,7 @@
             <form role="form" >
                 <div class="col-md-3 column" align="center"></div>
                     <div class="form-group col-md-6 column input-group" >
-                        <input name="searchContent" placeholder="输入商品名称"  class="form-control" id="searchContent" v-model="searchParam.content" />
+                        <input name="searchContent" placeholder="输入复制的淘宝商品名称"  class="form-control" id="searchContent" v-model="searchParam.content" />
                         <span  class="btn-success input-group-addon" @click="searchProduct()">搜索</span>
                     </div>
             </form>
@@ -93,7 +93,7 @@
 </div>
 </body>
 <script type="text/javascript">
-    var requestUrl = "http://127.0.0.1:9090";
+    var requestUrl = "http://127.0.0.1";
     var vm = new Vue({
         el: '#content',
         data() {
@@ -121,7 +121,7 @@
                     this.prodListLoadingOver=false;
                     this.lastPage=false;
                 }
-                if(!this.searchParam.content.trim()){
+                if(!this.searchParam.content){
                     alert("搜索内容不能为空");
                     return;
                 }

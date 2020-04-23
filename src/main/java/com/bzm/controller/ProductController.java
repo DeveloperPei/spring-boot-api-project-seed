@@ -41,7 +41,7 @@ public class ProductController {
         req.setHasCoupon(true);// 是否有优惠券
         // need_free_shipment 是否包邮
         // sort 排序  销量（total_sales），淘客佣金比率（tk_rate）， 累计推广量（tk_total_sales），总支出佣金（tk_total_commi），价格（price）
-        req.setSort("tk_rate_des");
+        req.setSort("tk_total_sales_des");
         try {
             TbkDgMaterialOptionalResponse rsp = client.execute(req);
             return ResultGenerator.genSuccessResult(rsp.getBody());
