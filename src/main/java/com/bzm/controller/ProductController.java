@@ -4,13 +4,16 @@ import cn.hutool.core.exceptions.ExceptionUtil;
 import com.bzm.core.Result;
 import com.bzm.core.ResultGenerator;
 import com.bzm.core.ServiceException;
+import com.bzm.entity.CreateTbkParamVo;
 import com.bzm.entity.SearchParamVo;
 import com.bzm.util.ConstantUtils;
 import com.taobao.api.ApiException;
 import com.taobao.api.DefaultTaobaoClient;
 import com.taobao.api.TaobaoClient;
 import com.taobao.api.request.TbkDgMaterialOptionalRequest;
+import com.taobao.api.request.TbkTpwdCreateRequest;
 import com.taobao.api.response.TbkDgMaterialOptionalResponse;
+import com.taobao.api.response.TbkTpwdCreateResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +44,24 @@ public class ProductController {
         req.setSort("tk_rate_des");
         try {
             TbkDgMaterialOptionalResponse rsp = client.execute(req);
+            return ResultGenerator.genSuccessResult(rsp.getBody());
+        } catch (ApiException e) {
+            throw new  ServiceException(ExceptionUtil.getRootCauseMessage(e),e);
+        }
+    }
+
+    @ApiOperation(value = "生成淘口令", notes="生成淘口令")
+    @PostMapping("createTbk")
+    public Result createTbk(@RequestBody CreateTbkParamVo createTbkVo){
+        String url="http://gw.api.taobao.com/router/rest";
+        TaobaoClient client = new DefaultTaobaoClient(url, ConstantUtils.APP_KEY, ConstantUtils.APP_SECRET);
+        TbkTpwdCreateRequest req = new TbkTpwdCreateRequest ();
+
+        req.setLogo(createTbkVo.getLogo());
+        req.setText(createTbkVo.getText());
+        req.setUrl(createTbkVo.getUrl());
+        try {
+             TbkTpwdCreateResponse rsp = client.execute(req);
             return ResultGenerator.genSuccessResult(rsp.getBody());
         } catch (ApiException e) {
             throw new  ServiceException(ExceptionUtil.getRootCauseMessage(e),e);

@@ -3,13 +3,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="ie=edge">
 <!-- 新 Bootstrap 核心 CSS 文件 https://cdn.staticfile.org/twitter-bootstrap/3.3.7/css/bootstrap.min.css-->
-<link href="../static/css/bootstrap.min.css" rel="stylesheet">
+<link href="css/bootstrap.min.css" rel="stylesheet">
 <!-- jQuery文件。务必在bootstrap.min.js 之前引入 https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js-->
-<script src="../static/js/jquery.min.js"></script>
+<script src="js/jquery.min.js"></script>
 <!-- 最新的 Bootstrap 核心 JavaScript 文件https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js -->
-<script src="../static/js/bootstrap.min.js"></script>
-<script src="../static/js/vue.js"></script>
-<script src="../static/js/axios.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/vue.js"></script>
+<script src="js/axios.js"></script>
 <head>
     <meta charset="UTF-8">
     <title>暴走的耗子</title>
@@ -37,6 +37,38 @@
                         <h3>
                             暴走的耗子 <small> · baozouMouse</small>
                         </h3>
+                        <h5 ><span @click="showLogin()">登录</span></button></h5>
+                    </div>
+                    <!-- 模态框（Modal） -->
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                    <h4 class="modal-title" id="myModalLabel">登录</h4>
+                                </div>
+                                <div class="modal-body" align="center">
+                                    <form class="form-horizontal" role="form">
+                                        <div class="form-group"  >
+                                            <label for="userName" class="col-md-2 column control-label" >姓名:</label>
+                                            <div class="col-md-10 column">
+                                                 <input type="text" class="form-control" id="userName" placeholder="请输入姓名">
+                                            </div>
+                                        </div>
+                                        <div class="form-group"  >
+                                            <label for="userName" class="col-md-2 column control-label" >密码:</label>
+                                            <div class="col-md-10 column">
+                                                 <input type="password" class="form-control" id="password" placeholder="请输入密码">
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal" >关闭</button>
+                                    <button type="button" class="btn btn-success" @click="login()">登录</button>
+                                </div>
+                            </div><!-- /.modal-content -->
+                        </div><!-- /.modal -->
                     </div>
                 </div>
             </div>
@@ -106,6 +138,7 @@
                 prodListLoadingOver:false,
                 lastPage: false,
                 tkl:'',
+                token:'',
                 searchParam:{
                     pageSize:12,
                     pageNum:1,
@@ -114,13 +147,30 @@
             }
         },
         methods: {
-            searchProduct(type){
-                if(type !=1){
-                    this.productList=null;
-                    this.searchParam.pageNum =1;
-                    this.prodListLoadingOver=false;
-                    this.lastPage=false;
-                }
+            showLogin(){
+                $('#myModal').modal('show')
+            },
+            login(){
+                var userName= $('#userName').val();
+                var password= $('#password').val();
+                axios({
+                    url: requestUrl+'/user/login',
+                    method: 'post',
+                    headers: {'Content-Type': 'application/json'},
+                    data: JSON.stringify({"userName":userName,"password":password})
+                }).then((res) => {
+                    if (res.data.code == '200') {
+                        this.token=res.data.data
+                        if(this.token){
+
+                        }
+                    } else {
+                        alert(res.data.message);
+                    }
+                })
+                // $('#myModal').modal('show')
+            },
+            searchProduct(){
                 if(!this.searchParam.content.trim()){
                     alert("搜索内容不能为空");
                     return;
@@ -184,7 +234,7 @@
                 /*console.log(scrollTop,":::",prodListHeight)*/
                 if(scrollTop > prodListHeight && this.prodListLoadingOver && !this.lastPage){
                     this.searchParam.pageNum =  this.searchParam.pageNum  + 1;
-                    this.searchProduct(1);
+                    this.searchProduct();
                 }
             }
 
